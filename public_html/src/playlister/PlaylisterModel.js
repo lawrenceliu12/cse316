@@ -244,6 +244,20 @@ export default class PlaylisterModel {
         this.saveLists();
     }
 
+    add() {
+        if (this.hasCurrentList()){
+            this.currentList.songs.push({
+                "title": "Untitled", 
+                "artist": "Untitled", 
+                "youTubeId": "dQw4w9WgXcQ" 
+            });
+            
+            this.view.refreshPlaylist(this.currentList);
+            this.saveLists(this.currentList);
+        }
+        
+    }
+
     // SIMPLE UNDO/REDO FUNCTIONS, NOTE THESE USE TRANSACTIONS
 
     undo() {

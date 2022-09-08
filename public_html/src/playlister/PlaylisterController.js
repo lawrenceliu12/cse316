@@ -51,6 +51,10 @@ export default class PlaylisterController {
             this.model.loadList(newList.id);
             this.model.saveLists();
         }
+        // HANDLER FOR ADDING A NEW SONG BUTTON
+        document.getElementById("add-button").onmousedown = (event) => {
+            this.model.add();
+        }
         // HANDLER FOR UNDO BUTTON
         document.getElementById("undo-button").onmousedown = (event) => {
             this.model.undo();
@@ -210,6 +214,28 @@ export default class PlaylisterController {
             card.ondragstart = (event) => {
                 card.classList.add("is-dragging");
                 event.dataTransfer.setData("from-id", i);
+            }
+
+            card.ondblclick = (event) => {
+                this.ignoreParentClick(event);
+
+                // // RECORD THE ID OF THE LIST THE USER WISHES TO DELETE
+                // // SO THAT THE MODAL KNOWS WHICH ONE IT IS
+                // this.model.setEditListId(id);
+
+                // // VERIFY THAT THE USER REALLY WANTS TO DELETE THE PLAYLIST
+                // // THE CODE BELOW OPENS UP THE LIST DELETE VERIFICATION DIALOG
+                // this.listToDeleteIndex = this.model.getListIndex(id);
+                // let listName = this.model.getList(this.listToDeleteIndex).getName();
+                // let deleteSpan = document.getElementById("delete-list-span");
+                // deleteSpan.innerHTML = "";
+                // deleteSpan.appendChild(document.createTextNode(listName));
+                // let deleteListModal = document.getElementById("delete-list-modal");
+
+                let editListModel = document.getElementById("edit-list-modal");
+                // OPEN UP THE DIALOG
+                editListModel.classList.add("is-visible");
+                this.model.toggleConfirmDialogOpen();
             }
 
             // WE ONLY WANT OUR CODE, NO DEFAULT BEHAVIOR FOR DRAGGING

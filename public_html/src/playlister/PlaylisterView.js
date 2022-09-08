@@ -107,6 +107,7 @@ export default class PlaylisterView {
         // FOR EACH SONG
         for (let i = 0; i < playlist.songs.length; i++) {
             // MAKE AN ITEM (i.e. CARD)
+            let index = i + 1;
             let song = playlist.getSongAt(i);
             let itemDiv = document.createElement("div");
             itemDiv.classList.add("list-card");
@@ -114,8 +115,20 @@ export default class PlaylisterView {
             itemDiv.id = "playlist-card-" + (i + 1);
 
             // PUT THE CONTENT INTO THE CARD
-            let itemText = document.createTextNode(song.title + " by " + song.artist);
-            itemDiv.appendChild(itemText);
+            let linkIDTitle = document.createElement('a');
+            linkIDTitle.href = "https://www.youtube.com/watch?v="+song.youTubeId;
+            linkIDTitle.innerHTML = song.title+" ";
+
+            let linkIDArtist = document.createElement('a');
+            linkIDArtist.href = "https://www.youtube.com/watch?v="+song.youTubeId;
+            linkIDArtist.innerHTML = " "+song.artist;
+
+            let numberedCard = document.createTextNode(index + ". ");
+            let byText = document.createTextNode("by");
+            itemDiv.appendChild(numberedCard);
+            itemDiv.appendChild(linkIDTitle);
+            itemDiv.appendChild(byText);
+            itemDiv.appendChild(linkIDArtist);
 
             // AND PUT THE CARD INTO THE UI
             itemsDiv.appendChild(itemDiv);
