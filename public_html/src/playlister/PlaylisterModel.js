@@ -1,6 +1,9 @@
 import jsTPS from "../common/jsTPS.js";
 import Playlist from "./Playlist.js";
 import MoveSong_Transaction from "./transactions/MoveSong_Transaction.js";
+import AddSong_Transaction from "./transactions/AddSong_Transaction.js";
+import DeleteSong_Transaction from "./transactions/DeleteSong_Transaction.js";
+import EditSong_Transaction from "./transactions/EditSong_Transaction.js";
 
 /**
  * PlaylisterModel.js
@@ -248,7 +251,7 @@ export default class PlaylisterModel {
         if (this.hasCurrentList()){
             this.currentList.songs.push({
                 "title": "Untitled", 
-                "artist": "Untitled", 
+                "artist": "Unknown", 
                 "youTubeId": "dQw4w9WgXcQ" 
             });
             
@@ -256,6 +259,24 @@ export default class PlaylisterModel {
             this.saveLists(this.currentList);
         }
         
+    }
+
+    addWithIndex(id, deletedSong){
+        if (this.hasCurrentList()){
+            this.currentList.songs.splice(id, 0, deletedSong);
+            this.view.refreshPlaylist(this.currentList);
+            this.saveLists(this.currentList);
+        }
+    }
+
+    edit(editSongId, editTitleId, editArtistId, editLinkId){
+        let editedSong = this.getSong(editSongId);
+        editedSong["title"] = editTitleId
+        editedSong["artist"] = editArtistId;
+        editedSong["youTubeId"] = editLinkId;
+
+        this.view.refreshPlaylist(this.currentList);
+        this.saveLists(this.currentList);
     }
 
     // SIMPLE UNDO/REDO FUNCTIONS, NOTE THESE USE TRANSACTIONS
@@ -279,6 +300,48 @@ export default class PlaylisterModel {
 
     addMoveSongTransaction(fromIndex, onIndex) {
         let transaction = new MoveSong_Transaction(this, fromIndex, onIndex);
+        this.tps.addTransaction(transaction);
+        this.view.updateToolbarButtons(this);
+    }
+
+    //Used to find whatever id of the song that is being added.
+    getEditId() {
+        return this.editId;
+    }
+
+    setEditId(initId) {
+        this.editId = initId;
+    }
+
+    getDeleteSongId(){
+        return this.deleteSongId;
+    }
+
+    setDeleteSongId(initId){
+        this.deleteSongId = initId;
+    }
+
+    deleteSong(id){
+        this.currentList.songs.splice(id, 1);
+        this.view.refreshPlaylist(this.currentList)
+        this.saveLists(this.currentList);
+    }
+
+    //START OF TRANSACTIONS
+    addSongTransaction(lastIndex){
+        let transaction = new AddSong_Transaction(this, lastIndex);
+        this.tps.addTransaction(transaction);
+        this.view.updateToolbarButtons(this);
+    }
+
+    deleteSongTransaction(id, deletedSong){
+        let transaction = new DeleteSong_Transaction(this, id, deletedSong);
+        this.tps.addTransaction(transaction);
+        this.view.updateToolbarButtons(this);
+    }
+
+    editSongTransaction(id, newTitle, newArtist, newLinkId){
+        let transaction = new EditSong_Transaction(this, id, newTitle, newArtist, newLinkId);
         this.tps.addTransaction(transaction);
         this.view.updateToolbarButtons(this);
     }

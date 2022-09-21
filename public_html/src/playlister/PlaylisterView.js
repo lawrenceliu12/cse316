@@ -18,9 +18,11 @@ export default class PlaylisterView {
     init() {
         // @todo - ONCE YOU IMPLEMENT THE FOOLPROOF DESIGN STUFF YOU SHOULD PROBABLY
         // START THESE BUTTONS OFF AS DISABLED
-        this.enableButton('undo-button');
-        this.enableButton('redo-button');
-        this.enableButton('close-button');
+        // this.enableButton('undo-button');
+        // this.enableButton('redo-button');
+        // this.enableButton('close-button');
+
+        this.updateToolbarButtons();
     }
 
     /*
@@ -130,6 +132,14 @@ export default class PlaylisterView {
             itemDiv.appendChild(byText);
             itemDiv.appendChild(linkIDArtist);
 
+            let deleteSong = document.createElement("input");
+            deleteSong.setAttribute("id", "delete-song-" + (i + 1));
+            deleteSong.setAttribute("class", "song-button");
+            deleteSong.setAttribute("type", "button");
+            deleteSong.setAttribute("value", "\u2715");
+
+            itemDiv.appendChild(deleteSong);
+
             // AND PUT THE CARD INTO THE UI
             itemsDiv.appendChild(itemDiv);
         }
@@ -206,14 +216,35 @@ export default class PlaylisterView {
         Implements our foolproof design strategy so that when toolbar
         buttons cannot be used they are disabled.
     */
-    updateToolbarButtons(model) {
+    updateToolbarButtons(model = this.controller.model) {
         let tps = model.tps;
-        if (model.confirmDialogOpen) {
-            this.disableButton("add-list-button");
-            this.disableButton("undo-button");
-            this.disableButton("redo-button");
-            this.disableButton("close-button");
+        this.disableToolBarButtons();
+
+        if (model.currentList){
+            this.disableButton('add-list-button');
+            if (!model.confirmDialogOpen){
+                this.enableButton('add-button');
+                this.enableButton('close-button');
+
+                if (tps.hasTransactionToUndo()){
+                    this.enableButton('undo-button');
+                }
+                if (tps.hasTransactionToRedo()){
+                    this.enableButton('redo-button');
+                }
+            }
         }
+        else{
+            this.enableButton('add-list-button');
+        }
+    }
+
+    disableToolBarButtons(){
+        this.disableButton('add-list-button');
+        this.disableButton('add-button');
+        this.disableButton('undo-button');
+        this.disableButton('redo-button');
+        this.disableButton('close-button');
     }
 
     /*

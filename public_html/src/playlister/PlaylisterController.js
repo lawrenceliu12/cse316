@@ -53,7 +53,8 @@ export default class PlaylisterController {
         }
         // HANDLER FOR ADDING A NEW SONG BUTTON
         document.getElementById("add-button").onmousedown = (event) => {
-            this.model.add();
+            let lastIndex = this.model.getPlaylistSize();
+            this.model.addSongTransaction(lastIndex);
         }
         // HANDLER FOR UNDO BUTTON
         document.getElementById("undo-button").onmousedown = (event) => {
@@ -105,7 +106,68 @@ export default class PlaylisterController {
             // CLOSE THE MODAL
             let deleteListModal = document.getElementById("delete-list-modal");
             deleteListModal.classList.remove("is-visible");
-        }        
+        }    
+        
+        //CONFIRM FOR EDIT
+        let confirmEdit = document.getElementById("edit-list-confirm-button");
+        confirmEdit.onclick = (event) => {
+            let editSongId = this.model.getEditId();
+            let editTitleId = document.getElementById("editTitleId").value;
+            let editArtistId = document.getElementById("editArtistId").value;
+            let editLinkId = document.getElementById("editLinkId").value;
+
+            this.model.editSongTransaction(editSongId, editTitleId, editArtistId, editLinkId);
+
+            //OPEN OTHER INTERACTIONS
+            this.model.toggleConfirmDialogOpen();
+
+            // CLOSE THE MODAL
+            let editListModal = document.getElementById("edit-list-modal");
+            editListModal.classList.remove("is-visible");
+
+            // editTitleId = "";
+            // editArtistId = "";
+            // editLinkId = "";
+        }
+
+        //CANCEL FOR EDIT
+        let cancelEdit = document.getElementById("edit-list-cancel-button");
+        cancelEdit.onclick = (event) => {
+            // ALLOW OTHER INTERACTIONS
+            this.model.toggleConfirmDialogOpen();
+            
+            // CLOSE THE MODAL
+            let editListModal = document.getElementById("edit-list-modal");
+            editListModal.classList.remove("is-visible");
+        }
+
+        //CONFIRM DELETE SONG -- ADDED WITH TRANSACTIONS
+        let confirmDelete = document.getElementById("delete-song-confirm-button");
+        confirmDelete.onclick = (event) => {
+            let deleteSongId = this.model.getDeleteSongId();
+
+            // this.model.deleteSong(deleteSongId);
+            let deletedSong = this.model.getSong(deleteSongId);
+            this.model.deleteSongTransaction(deleteSongId, deletedSong);
+
+            // ALLOW OTHER INTERACTIONS
+            this.model.toggleConfirmDialogOpen();
+
+            // CLOSE THE MODAL
+            let deleteSongModal = document.getElementById("delete-song-modal");
+            deleteSongModal.classList.remove("is-visible");
+        }
+
+        //CANCEL DELETE SONG
+        let cancelDelete = document.getElementById("delete-song-cancel-button");
+        cancelDelete.onclick = (event) => {
+            // ALLOW OTHER INTERACTIONS
+            this.model.toggleConfirmDialogOpen();
+            
+            // CLOSE THE MODAL
+            let cancelListModal = document.getElementById("delete-song-modal");
+            cancelListModal.classList.remove("is-visible");
+        }
     }
 
     /*
@@ -203,6 +265,7 @@ export default class PlaylisterController {
         for (let i = 0; i < this.model.getPlaylistSize(); i++) {
             // GET THE CARD
             let card = document.getElementById("playlist-card-" + (i + 1));
+            let deleteButton = document.getElementById("delete-song-" + (i + 1));
             
             // NOW SETUP ALL CARD DRAGGING HANDLERS AS THE USER MAY WISH TO CHANGE
             // THE ORDER OF SONGS IN THE PLAYLIST
@@ -219,20 +282,18 @@ export default class PlaylisterController {
             card.ondblclick = (event) => {
                 this.ignoreParentClick(event);
 
-                // // RECORD THE ID OF THE LIST THE USER WISHES TO DELETE
-                // // SO THAT THE MODAL KNOWS WHICH ONE IT IS
-                // this.model.setEditListId(id);
-
-                // // VERIFY THAT THE USER REALLY WANTS TO DELETE THE PLAYLIST
-                // // THE CODE BELOW OPENS UP THE LIST DELETE VERIFICATION DIALOG
-                // this.listToDeleteIndex = this.model.getListIndex(id);
-                // let listName = this.model.getList(this.listToDeleteIndex).getName();
-                // let deleteSpan = document.getElementById("delete-list-span");
-                // deleteSpan.innerHTML = "";
-                // deleteSpan.appendChild(document.createTextNode(listName));
-                // let deleteListModal = document.getElementById("delete-list-modal");
-
                 let editListModel = document.getElementById("edit-list-modal");
+
+                let editTitleId = document.getElementById("editTitleId");
+                let editArtistId = document.getElementById("editArtistId");
+                let editLinkId = document.getElementById("editLinkId");
+
+                this.model.setEditId(i);
+                
+                editTitleId.value = this.model.getSong(i)["title"];
+                editArtistId.value = this.model.getSong(i)["artist"];
+                editLinkId.value = this.model.getSong(i)["youTubeId"];
+
                 // OPEN UP THE DIALOG
                 editListModel.classList.add("is-visible");
                 this.model.toggleConfirmDialogOpen();
@@ -262,6 +323,15 @@ export default class PlaylisterController {
                     && !isNaN(toIndex)) {
                     this.model.addMoveSongTransaction(fromIndex, toIndex);
                 }
+            }
+            
+            deleteButton.onclick = (event) => {
+                let deleteSongModal = document.getElementById("delete-song-modal");
+                let deleteSongSpan = document.getElementById("delete-song-span");
+                this.model.setDeleteSongId(i);
+                deleteSongSpan.innerHTML = this.model.getSong(i)["title"];
+                deleteSongModal.classList.add("is-visible");
+                this.model.toggleConfirmDialogOpen();
             }
         }
     }
